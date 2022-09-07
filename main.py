@@ -1,12 +1,17 @@
 # GUI Wrapper Script for txt_to_osm
 # created 220905 by chanhyeokson
-
+import time
 from tkinter import *
 from PIL import ImageTk, Image
 import os
-from ott_utils.osmtotxt import osm_to_txt
 from ott_utils.point_increment import point_increment
-from ott_utils.trajectory_generator import trajectory_generator
+from ott_utils.log import WKLogger
+from ott_utils.txt_to_osm import txt_to_osm
+from ott_utils.osm_to_txt import osm_to_txt
+from ott_utils import OSMHandler
+
+lg = WKLogger(os.path.join(os.getcwd(),'logs'))
+
 
 
 ##########parameters to modify
@@ -17,28 +22,12 @@ OTT_PATH = './osm_to_txt'
 TRAJECTORY_GENERATOR_PATH = './trajectory_generator/input'
 #############
 
-curr_raw_path = RAW_PATH
-curr_densed_path = DENSED_PATH
-curr_osm_to_txt_path = OTT_PATH
-curr_trajectory_generator_path = TRAJECTORY_GENERATOR_PATH
-node_int = NODE_INT
-
 root = Tk()
 
 global work_stat  # 함수 btnpress() 정의
 global chkvar
 global chkvar1
 global chkvar2
-
-
-# def dense_ask():
-#     curr_densed_path = filedialog.askdirectory()
-#     #root.file = filedialog.askopenfile(initialdir='path', title='select file', filetypes=(('jpeg files', '*.jgp'), ('all files', '*.*')))
-    
-#     print (curr_densed_path)
-#     pinc_txt.configure(text="pwd: " + curr_densed_path)
-
-
 
 def Runner():  
     global work_stat                 # 함수 btnpress() 정의
@@ -119,5 +108,49 @@ def init_gui():
 
     root.mainloop()
 
+
+def foldername_generator(pth):
+    # 현재 날짜를 받아옵니다.
+    curr_time = time.localtime()
+    yr = str(curr_time.tm_year)[2:]
+
+    # 날짜가 10보다 작은 경우, 앞에 0을 붙여줍니다.
+    month = (lambda x: '0' + str(x) if x < 10 else str(x))(curr_time.tm_mon)
+    d = (lambda x: '0' + str(x) if x < 10 else str(x))(curr_time.tm_mday)
+    h = (lambda x: '0' + str(x) if x < 10 else str(x))(curr_time.tm_hour)
+    _min = (lambda x: '0' + str(x) if x < 10 else str(x))(curr_time.tm_min)
+    _sec = (lambda x: '0' + str(x) if x < 10 else str(x))(curr_time.tm_sec)
+
+    folders = []
+
+    # 점을 포함하지 않으며, 끝이 숫자로 끝나는 것들을 리스트로 반환합니다.
+    for t in os.listdir(pth):
+        # lg.debug(t)
+
+        if str(t).find(".") == -1:
+            if t[-1].isdigit():
+                folders.append(int(t.split(sep='_')[1]))
+
+    lg.debug('folders : ' + str(folders))
+
+    cnt = '1' if len(folders) == 0 else str(max(folders) + 1)
+    lg.debug('count : ' + cnt)
+
+    ret = yr + month + d + 'T' + h + _min + _sec + '_' + cnt
+    return ret
+
+def txt_enhancer():
+    source_dir = 'C:\\Users\\chanh\\PycharmProjects\\osm-to-txt-converter\\txt_to_osm'
+
+
+    lg.info('this will turn raw txt into enhanced one.')
+    txt_to_osm(source_dir)
+    point_increment()
+
+
+
+
+
 if __name__ == "__main__":
-    init_gui()
+    # init_gui()
+    txt_enhancer()

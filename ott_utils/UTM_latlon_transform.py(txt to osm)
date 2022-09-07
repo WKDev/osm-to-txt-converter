@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 # from cv2 import FileNode_UNIFORM
+import random
 from re import U
 import numpy as np
 import pandas as pd
@@ -63,6 +64,12 @@ def write_osm(node):
 
     # OSM 작성 시작
     text = ["<?xml version='1.0' encoding='UTF-8'?>\n", "<osm version='0.6' upload='false' generator='JOSM'>\n"]
+
+    for nd in node:
+        text.append("  <node id='{0}' lat='{1}' lon='{2}' />\n".format(-int(nd[0]), nd[1], nd[2]))
+    rd = random.randrange(-999999, 0)
+    text.append("  <way id='{}' action='modify' visible='true'>".format(rd))
+    <nd ref='-3628284' />
 
     for nd in node:
         text.append("  <node id='{0}' lat='{1}' lon='{2}' />\n".format(-int(nd[0]), nd[1], nd[2]))
@@ -137,7 +144,6 @@ if __name__ == '__main__':
             node_pooling = np.vstack((node_pooling, row))
     ##########################
 
-
     write_osm(node_pooling)
 
 
@@ -150,8 +156,6 @@ if __name__ == '__main__':
     # new_node_UTM = latlon_2_UTM(tmp_node_latlon)
     # new_node_UTM.astype(np.float32)
     # write_UTM_txt(new_node_UTM)
-
-
 
 lat_lon = utm.to_latlon(302551.533431,4123889.68239, 52, 's')
 UTM = utm.from_latlon(lat_lon[0], lat_lon[1])

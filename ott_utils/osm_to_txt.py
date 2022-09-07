@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# osmtotxt.py
+# osm_to_txt.py
 
 # created : 
 # modified : chanhyeokson
