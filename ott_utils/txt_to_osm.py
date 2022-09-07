@@ -104,10 +104,10 @@ def chk_path(path):
         return '%s/*.txt' % os.getcwd()
     elif path.startswith('C:\\'):
         print('startwith windows')
-        return '%s\\*.txt' % os.getcwd()
+        return '%s\\*.txt' % path
     elif path.startswith('./'):
         print('startwith relative_path')
-        return '%s/*.txt' % path
+        return '%s/*.txt' % os.path.join(os.getcwd(),path[2:])
 
     else:
         print('획인된 경로 : ' + str(path))
@@ -116,16 +116,16 @@ def chk_path(path):
         raise Exception
 
 
-def txt_to_osm(input):
+def txt_to_osm(source):
 
-    src = chk_path(path=input)
-    print(src)
+    src = chk_path(path=source)
+    # print(src)
 
     for file_path in glob.glob(src):
         parent = os.path.dirname(file_path)
         filename = os.path.basename(file_path)
 
-        pd.read_table(file_path, sep="," ,encoding='cp949')
+        pd.read_table(file_path, sep="," ,  header=None ,names=['utm_x', 'utm_y'])
         f = np.genfromtxt(fname=file_path)
 
         print(file_path)
@@ -135,8 +135,7 @@ def txt_to_osm(input):
 
 if __name__ == '__main__':
 
-
-    txt_to_osm(input='C:\\Users\\chanh\\PycharmProjects\\osm-to-txt-converter\\txt_to_osm')
+    txt_to_osm(source='C:\\Users\\chanh\\PycharmProjects\\osm-to-txt-converter\\txt_to_osm')
     # txt 맵 수만큼 반복해서 np arr에 담는다.
 #     # 1~34
 #     readed_utm_map = np.empty(shape=(0,2))   ##txt to osm
