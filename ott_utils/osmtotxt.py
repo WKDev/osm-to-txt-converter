@@ -34,13 +34,14 @@ OUTPUT_FOLDER = 'ret'
 
 #새로 만드는 id가 기존의 id와 겹치지 않게 조정하는 함수
 def check_new_id(nid, id_list):
-    if np.isin(-nid, id_list):
+    if np.isin(-nid, id_list): #
         nid += 1
+        return check_new_id(nid, id_list)
 
     else:
         return nid
 
-    return check_new_id(nid, id_list)
+
 
 
 

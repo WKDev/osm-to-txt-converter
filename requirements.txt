@@ -1,3 +1,6 @@
-osmium~=3.4.1
-haversine~=2.6.0
+osmium
+haversine
 utm
+pandas
+pillow
+numpy
