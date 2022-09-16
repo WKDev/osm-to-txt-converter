@@ -1,252 +1,211 @@
 #!/usr/bin/env python3
-from . import OSMHandler
+from ott_utils.common import _smooth
+from ott_utils.deprecated import OSMHandler
 
 import argparse
 import math
 import numpy as np
 from haversine import haversine
-import os
+import os, glob, time
+from .log import WKLogger
+import xml.etree.ElementTree as et
+import utm
 
-#Arguments Parsing
-parser = argparse.ArgumentParser()
-parser.add_argument('--file', '-f', nargs='*', help='file_names', default=[], dest='file_names')
-parser.add_argument('--option', '-o', nargs='*', help='options', default=[], dest='options')
-
-filename_input = parser.parse_args().file_names
-option_input = parser.parse_args().options
-
-# if len(filename_input) == 0:
-#
-#     # lane_file_name = "/home/kroad/HDMap_data/HDMap_UTMK_osm/B2_SURFACELINEMARK.osm"
-#     #print("----------ARTIV_OSM_FORMATTER----------")
-#     #print('LINK File : "A2_LINK.osm"')
-#     #print('LANE File : "B2_SURFACELINEMARK.osm"')
-#     #print('Output File : "A2_LINK_output.osm"')
-#     print("")
-# else:
-#     raise Exception('Invalid Arguments')
-#
-
-if len(option_input) == 0:
-    node_interval = 0.05  # 점과 점사이 간격 (단위:m)
-    lane_change_nodes = 20
+UTM_zone_x = 52
+UTM_zone_y = 'n'
 
 
-elif len(option_input) == 1:
-    node_interval = float(option_input[0])
-    lane_change_nodes = 20
-
-elif len(option_input) == 2:
-    node_interval = float(option_input[0])
-    lane_change_nodes = int(option_input[1])
-
-else:
-    raise Exception('Invalid Arguments')
+lg = WKLogger( target='point_increment' , log_path=None, log_level = 'info')
 
 
+def point_increment(src_path = None, path_smooth = True, src_array = None, dst = None, save = True, diagnostic = True, node_interval = 0.1, filename='test'):
+    '''
+    point_increment
+    ---------------
+    두 점이 있으면, 그 사이를 일정한 간격으로 보간해줍니다.
 
 
-#새로 만드는 id가 기존의 id와 겹치지 않게 조정하는 함수
-def check_new_id(nid, id_list):
-    if np.isin(-nid, id_list):
-        nid += 1
+    간단한 원리 설명
+    ------------
+    1. 각 라인의 점과 점 사이는 직선이라 가정합니다.
+    2. 두 점으로부터, 거리를 계산하고, 직선의 방정식을 생성합니다.
+    (WGS84를 기반으로 계산하는 경우, haversine 사용을 고려해야 하지만, UTM은 그냥 보간해도 됩니다.)
+    3. 두 점의 거리에 node_interval 에 부합하도록 얼마나 많은 점이 들어갈 수 있을지 고려하여, 보간 좌표를 찍습니다.
+    4. 다만 이경로는 방향이 존재한다는 것을 고려해야 합니다. 전 수학을 못해서 하드코딩했는데,아마 벡터 연산을 사면 더 스마트한 방식으로
+    구현이 가능하지 않을까...
 
-    else:
-        return nid
-
-    return check_new_id(nid, id_list)
-
-def point_increment(node_interval, src,dst):
-    """_summary_
 
     Args:
-        src (string): JOSM으로 생성한 raw data 경로
-        dst (string): 촘촘하게 만든 출력 경로
+        src_path: /home/abc.txt 식의 문자열을 넣어주면 거기에서 utm좌표를 불러와 점을 늘린 후, dst 경로에 반환합니다.
+        path_smooth:
+        src_array:
+        dst: /home/output 식의 문자열을 넣어주면 처리 후 저장합니다. 단, 이 때, save=True여야 합니다.
+        save: True인 경우, 실제 파일로 저장합니다. 기본값이 True입니다.
+        node_interval: 촘촘하게 만들 점 주기를 설정합니다.
 
-    Raises:
-        FileNotFoundError: src 파라미터로 입력받은 경로가 존재하지 않습니다.
-        IndexError: _description_
-        IndexError: _description_
-    """
+    Returns:
 
-    print('[DENSE][INFO] Node Interval :', node_interval, 'meter(s)')
-    print('[DENSE][INFO] # of Lane Change Nodes :', lane_change_nodes)
-    print("")
-
-    #기존 주행유도선 파일 데이터 parsing
-    try:
-        if not os.path.isdir(src):
-            print(src)
-            raise FileNotFoundError
-        
-        files = os.listdir(src)
-        print('[DENSE][INFO] detected files:')
-        print('[DENSE][INFO]'+ str(files))
+    '''
 
 
-        if len(files) == 0:
-            raise IndexError
-        files.sort()
+    old_cx, old_cy, new_cx, new_cy = [], [], [], [] # path_smoothing 코드 합침 220914 by chanhyeokson
 
-        if not os.path.isdir(dst):
-            print('[DENSE][INFO]' + os.listdir(dst))
-            raise FileNotFoundError
-            
-        files.sort()
+    # lg.info(src)
+    p_prev = None # i-1번째 점
+    p_pp = None # i-2번째 점
 
-    except FileNotFoundError as e:
-        print('\033[31m[DENSE][ERROR] input/output 폴더가 존재하지 않습니다. ')
-        print('\033[31m[DENSE][ERROR] input folder : '+ os.path.join(os.getcwd(),src[2:]))
-        print('\033[31m[DENSE][ERROR] output folder : '+ os.path.join(os.getcwd(),dst[2:]))
+    array_raw = np.empty((0, 3), dtype=np.float64)
+    incremented = np.empty((0, 2), dtype=np.float64)
 
-        quit()
+    if src_path is not None:
+        txt_raw = np.loadtxt(src_path, dtype=str, delimiter=',')
+        array_raw = txt_raw.astype(np.float64)
+        # lg.info(txt_raw)
 
-    except IndexError:
-        print('\033[31m[DENSE][ERROR] '+ src + ' 폴더 내부에 파일이 존재하지 않습니다. ')
-        quit()
+    if src_array is not None:
+        array_raw = src_array
 
-    for f in files:
-        print(os.path.join(dst,f))
-        output = open(os.path.join(os.getcwd(),dst[2:],f), mode='wt')  # 촘촘하게 작성
+    for i, p in enumerate(array_raw):
+        _x2 = None
+        _y2 = None
+        _x1 = None
+        _y1 = None
+        _x0 = None
+        _y0 = None
+        if i == 0:
+            p_prev = p
+            incremented = np.append(incremented, [p], axis=0)
+            continue
+        else:
+            if i > 2 and diagnostic:
+                _x0 = p_pp[0]
+                _y0 = p_pp[1]
 
-        file_name = os.path.join(src,f)
+            _x2 = p[0]
+            _y2 = p[1]
+            _x1 = p_prev[0]
+            _y1 = p_prev[1]
 
-        osm_data = OSMHandler.OSM_data(file_name)
+            # if p_prev[0] > p[0]: # x값이 감소하는 경우
 
-        nodes = []
-        ways = []
-        new_nodes = []
-        way_id_lst = []
+            dist = np.linalg.norm(p_prev - p) # 유클리드 거리 계산
+            lg.debug('dist : {} {} {} {} {}'.format(_x1, _y1, _x2, _y2,dist))
+            # lg.info(p)
+            # lg.info(p_prev)
 
-        for data in osm_data:
-            if data[0] == 'node' :
-                nodes.append(data[1:4])
+            # 거리가 너무 좁으면 이 작업을 스킵합니다.
+            if dist < node_interval:
+                lg.warn('dist : {} is less than node interval'.format(dist))
+                continue
 
-            elif data[0] == 'way' :
-                ways.append(data)
-                way_id_lst.append(data[1])
+            x_dist = abs(_x2 - _x1)
+            y_dist = abs(_y2 - _y1)
 
+            # 기울기
+            _slope = lambda b2, b1, a2, a1 : (b2 - b1)/(a2 - a1)
+            slope = _slope(_y2,_y1,_x2,_x1)
+            lg.debug('slope : {}'.format(slope))
+            # 두 점으로 만들어낸 일차함수
+            _eq_y = lambda x: slope * (x - _x2) + _y2
 
-        nodes = np.array(nodes)
-        node_ids = nodes[:,0]
+            # 두 점사이에 추가할 수 있는 점 개수 세기
+            _point_available = int(dist/node_interval) -1
+            _points_to_add = np.empty((0, 2), dtype=np.float64)
 
-        #node 세분화
-        id_count = 1 #새로 만드는 node ID는 200000부터 시작
+            lg.debug('expected new points : {}'.format(_point_available))
 
-        for way in ways:
-            ref_nodes = way[2] #way를 구성하는 nodes
+            if i > 2 and diagnostic:
+                # threshold = np.pi / 4  # 점이 아무리 꺾여도 pi/4 이상 꺾이면 문제가 있는겁니다.. point_increment 진행하면 더욱 더요.
+                threshold = 45
+                # k점과 k-1, k-1과 k-2간의 각도 구하기
+                prev_slope_deg = np.rad2deg(np.arctan2(_y1-_y0, _x1-_x0))
+                curr_slope_deg = np.rad2deg(np.arctan2(_y2-_y1, _x2-_x1))
 
-            cnt = 0
-            ref_nodes_num = len(ref_nodes)
-            every_nodes_for_each_way = []
+                check_line_valid = True if prev_slope_deg-threshold < curr_slope_deg < threshold + prev_slope_deg else False
 
-            #node 간격 파악 후 세분화
-            while cnt < ref_nodes_num - 1:
-                id1, id2 = ref_nodes[cnt], ref_nodes[cnt+1]
+                lg.debug('current deg : {}, prev: {}'.format(curr_slope_deg, prev_slope_deg))
 
-                temp_nodes = dict()
-
-                id1_idx = np.where(nodes[:,0] == id1)
-                temp_nodes['id1'] = nodes[id1_idx][0][1:]
-
-                id2_idx = np.where(nodes[:,0] == id2)
-                temp_nodes['id2'] = nodes[id2_idx][0][1:]
-
-                #node 간 거리를 haversine 공식으로 계산
-                temp_dist = haversine(temp_nodes['id1'], temp_nodes['id2'], unit = 'm')
-
-                #설정한 간격 이하로 노드 간격을 맞추기 위해 필요한 노드의 개수
-                n = math.ceil((1/node_interval)*temp_dist + 1)
-
-                #새로운 nodes 형성
-                temp_new_nodes = []
-
-                temp_point_x = (temp_nodes['id1'][0])
-                temp_point_y = (temp_nodes['id1'][1])
-                temp_new_nodes.append([id1, temp_point_x,temp_point_y])
-
-                for k in range(1,n-1):
-                    temp_point_x = (temp_nodes['id1'][0]*(n-1-k) + temp_nodes['id2'][0]*k)/(n-1)
-                    temp_point_y = (temp_nodes['id1'][1]*(n-1-k) + temp_nodes['id2'][1]*k)/(n-1)
-                    temp_new_nodes.append([0, temp_point_x,temp_point_y])
-
-                every_nodes_for_each_way.extend(np.array(temp_new_nodes))
+                if not check_line_valid:
+                    lg.err('current deg : {}, prev: {}'.format(curr_slope_deg, prev_slope_deg))
+                    if src_path is not None:
+                        lg.err('invalid path moving detected at the file {}, line : {}'.format(src_path, i))
+                    if src_array is not None:
+                        lg.err('invalid path moving detected at filename : {}, src array line:{}, check original file.'.format(filename,i))
 
 
-                cnt += 1
+            if _point_available > 2:
+                for t in range(_point_available):
+                    tmp_point = np.empty((0, 1), dtype=np.float64)
+                    t = t+1 # 0 -n --> 1-->n+1
 
-                #way내 마지막 node
-                if cnt == ref_nodes_num - 1:
-                    every_nodes_for_each_way.append(np.array([id2, temp_nodes['id2'][0],temp_nodes['id2'][1]]))
-            every_nodes_for_each_way = np.array(every_nodes_for_each_way)
-            #print(every_nodes_for_each_way)
+                    if slope > 0: # 기울기가 0보다 크면 , p가 p_prev보다 크다,
+
+                        if p_prev[0] < p[0]:
+                            x_new = _x1 + x_dist * t / _point_available
+                            y_new = _eq_y(x_new)
+                        else:
+                            x_new = _x1 - x_dist * t / _point_available
+                            y_new = _eq_y(x_new)
+
+                        # x_new = _x1 + x_dist*t / _point_available
+                        # y_new = _y1 + y_dist*t / _point_available
+                        tmp_point = np.array([x_new, y_new],dtype=np.float64)
+
+                    if slope < 0: # 기울기가 0보다 크면 , p가 p_prev보다 크다,
+                        if p_prev[0] < p[0]:
+                            x_new = _x1 + x_dist * t / _point_available
+                            y_new = _eq_y(x_new)
+                        else:
+                            x_new = _x1 - x_dist * t / _point_available
+                            y_new = _eq_y(x_new)
+
+                        tmp_point = np.array([x_new, y_new],dtype=np.float64)
+
+                    _points_to_add = np.append(_points_to_add, [tmp_point], axis=0)
+
+                incremented = np.append(incremented, _points_to_add[:-1],axis=0)
+
+            lg.debug('incremented :')
+            lg.verbose(incremented)
+
+        incremented = np.append(incremented, [p], axis=0)
+
+        if diagnostic:
+            p_pp = p_prev
+            p_prev = p
+
+    txt_path = os.path.join(dst, filename +'.txt')
+    # txt_path = os.path.join(dst, str(dst.replace('.txt', '').split(sep='/')[-1]) + '.txt')
+    lg.debug('file will be saved here:  {}'.format(txt_path))
 
 
-            #새로운 nodes에 id 부여
-            ## try and except    added by Wontae
-            try:
-                no_id_idx = np.isin(every_nodes_for_each_way[:,0], 0)
-            except IndexError as e:
-                print("\033[31m[DENSE][ERROR] Please check ((( action= delete ))) in .osm file")
-                raise IndexError(e)
+    if path_smooth:
+        cx = incremented
+        newpath = _smooth(cx)
+        with open(txt_path, 'w') as fw:
+            for coord_x, coord_y in newpath:
+                # print(coord_x,coord_y)
+                fw.write(str(coord_x))
+                fw.write(',')
+                fw.write(str(coord_y))
+                fw.write('\n')
+                new_cx.append(coord_x)
+                new_cy.append(coord_y)
 
+        return
 
-            for i, tf in enumerate(no_id_idx):
-                if tf:
-                    id_count = check_new_id(id_count, node_ids)
-                    every_nodes_for_each_way[i][0] = -id_count
-                    id_count += 1
+    if save:
+        # lg.debug(str(incremented))
+        np.savetxt(txt_path, incremented, fmt='%s', delimiter=',')
 
-            #way에 새로 만들어진 node들을 추가
-            temp_id_list = every_nodes_for_each_way[:,0]
-            temp_id_list = list(temp_id_list.astype(int))
-
-
-            way[2] = temp_id_list
-
-            #pyroutelib3 사용을 위해 way에 태그 추가
-            way[3] += 1
-            way[4]['highway'] = 'trunk'
-
-            new_nodes.extend(every_nodes_for_each_way)
-
-        #중복 노드 제거
-        new_nodes = np.array(new_nodes)
-
-        nodes_uni = [tuple(row) for row in new_nodes]
-        nodes_uni = list(set(nodes_uni))
-        nodes_uni.sort(reverse=True)
-
-
-        nodes_np = np.array(nodes_uni)
-
-        # OSM 작성 시작
-        text = ["<?xml version='1.0' encoding='UTF-8'?>\n", "<osm version='0.6' upload='false' generator='JOSM'>\n"]
-
-        for nd in nodes_uni:
-            text.append("  <node id='{0}' lat='{1}' lon='{2}' />\n".format(int(nd[0]), nd[1], nd[2]))
-
-        for w in ways:
-            text.append("  <way id='{0}' action='modify'>\n".format(w[1]))
-            for nd in w[2]:
-                text.append("    <nd ref='{0}' />\n".format(nd))
-            keys=[]
-            keys = w[4].keys()
-            for key in keys:
-                text.append("    <tag k='{0}' v='{1}' />\n".format(key, w[4][key]))
-            text.append("  </way>\n")
-
-        text.append("</osm>")
-
-        for line in text:
-            output.write(line)
-
-    output.close()
-
-    print("\033[32m[DENSE][INFO] All processes have ended!")
-
+            # 4m 간격 거리에 2m 간격으로 점을 추가한다면? 1개 개
+            # 6m 간격에 1m 간격으로 추가하면? 5개 |-.-.-.-.-.-|
+            #
+            # 두 점으로부터 linear regression
+            # sqrt(x^2-y^2) = node_interval
+            # y-y0 = (y-y0)/(x-x0)*(x-x0)
 
 if __name__ == '__main__':
 
-    # point_increment()
+    # ret()
     pass

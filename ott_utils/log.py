@@ -5,9 +5,9 @@ import os
 import time
 
 class WKLogger:
-    def __init__(self, log_path=None, log_level = 'verbose'):
+    def __init__(self,target=os.path.basename(__file__) , log_path=None, log_level = 'verbose'):
         level = ['verbose','debug','info','warn','err', 'fatal']
-
+        self.target = target
         self.log_path = log_path
         self.COLOR = {'black': '\033[0m', 'red':'\033[31m', 'yellow':'\033[33m','white':'\033[37m','green':'\033[32m', 'none':'\033[0m', 'blue':'\033[34m', 'cyan':'\033[46m'}
         self.log_level = level.index(log_level)
@@ -55,47 +55,46 @@ class WKLogger:
 
 
     def verbose(self, contents='', c='green', write=True):
-        raw_log = '[' + self.get_date_and_time() + ']' + '[' + os.path.basename(__file__) + '][VERBOSE] ' + str(contents)
-        # colored_log = self.COLOR[c] +raw_log+'\033[0m'
+        raw_log = '[' + self.get_date_and_time() + ']' + '[' + self.target + '][VERBOSE] ' + str(contents)
         if write:
             self.add_data(data=raw_log)
-        if self.log_level >= 0:
+        if self.log_level <= 0:
             print(raw_log)
 
     def debug(self, contents='', c='blue', write=True):
-        raw_log = '[' + self.get_date_and_time() + ']' + '[' + os.path.basename(__file__) + '][DEBUG] ' + str(contents)
+        raw_log = '[' + self.get_date_and_time() + ']' + '[' + self.target + '][DEBUG] ' + str(contents)
+        colored_log = self.COLOR[c] + raw_log + '\033[0m'
+        if write:
+            self.add_data(data=raw_log)
+        if self.log_level <= 1:
+            print(colored_log)
+
+    def info(self, contents='', c='green', write=True):
+        raw_log = '[' + self.get_date_and_time() + ']' + '[' + self.target + '][INFO] ' + str(contents)
         colored_log = self.COLOR[c] + raw_log + '\033[0m'
         if write:
             self.add_data(data=raw_log)
         if self.log_level <= 2:
             print(colored_log)
 
-    def info(self, contents='', c='green', write=True):
-        raw_log = '[' + self.get_date_and_time() + ']' + '[' + os.path.basename(__file__) + '][INFO] ' + str(contents)
-        colored_log = self.COLOR[c] + raw_log + '\033[0m'
+    def warn(self, contents='', c='yellow', write=True):
+        raw_log = '['+self.get_date_and_time()+']'+'['+self.target +'][WARN] ' + str(contents)
+        colored_log = self.COLOR[c] +raw_log+'\033[0m'
         if write:
             self.add_data(data=raw_log)
         if self.log_level <= 3:
             print(colored_log)
 
-    def warn(self, contents='', c='yellow', write=True):
-        raw_log = '['+self.get_date_and_time()+']'+'['+os.path.basename(__file__) +'][WARN] ' + str(contents)
-        colored_log = self.COLOR[c] +raw_log+'\033[0m'
+    def err(self, contents='', c='red', write=True):
+        raw_log = '['+self.get_date_and_time()+']'+'['+self.target +'][ERROR] ' + str(contents)
+        colored_log = self.COLOR[c] + raw_log +'\033[0m'
         if write:
             self.add_data(data=raw_log)
         if self.log_level <= 4:
             print(colored_log)
 
-    def err(self, contents='', c='red', write=True):
-        raw_log = '['+self.get_date_and_time()+']'+'['+os.path.basename(__file__) +'][ERROR] ' + str(contents)
-        colored_log = self.COLOR[c] + raw_log +'\033[0m'
-        if write:
-            self.add_data(data=raw_log)
-        if self.log_level <= 5:
-            print(colored_log)
-
 if __name__ == '__main__':
-    lg = WKLogger(log_path='./')
+    lg = WKLogger(log_path='./',)
 
     lg.verbose('verbose')
     lg.debug('debug')
