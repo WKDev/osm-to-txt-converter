@@ -29,7 +29,7 @@ else:
 UTM_zone_x = 52
 UTM_zone_y = 'n'
 
-lg = WKLogger( log_level = 'info', target=os.path.basename(__file__))
+lg = WKLogger( log_level = 'info', target=os.path.basename(__file__),log_path=os.getcwd())
 
 def osm_to_txt(src, dst, save = True, return_type ='utm', coord = None, unify_endpoint=True):
     '''
@@ -43,9 +43,13 @@ def osm_to_txt(src, dst, save = True, return_type ='utm', coord = None, unify_en
         dst: 출력 경로를 지정합니다. 경로의 파일 이름까지 지정할 필요는 없습니다. 입력물과 출력물의 경로는 똑같습니다.
         save: True인 경우, 실제 파일로 저장합니다. 기본값이 True입니다.
         return_type: 반환 타입을 지정합니다. 기본적으로 utm 값을 반환하지만, 원하는 경우, WGS84로 변환도 가능합니다.
+        coord : 임의의 좌표값을 받습니다. 보통 전 파일의 끝 라인을 받습니다.
+        unify_endpoint : coord 파라미터로 받은 데이터를 현재 변환중인 파일의 첫 라인에 넣어줍니다.(여러 파일의 분기점을 하나로 맞추기 위함입니다.)
 
     Returns: 2-depth ndarray
     [[utm_x1, utm_y1], .... [utm_xn, utm_yn]]
+    [[utm_x1, utm_y1], .... [utm_xn, utm_yn]]
+
     '''
 
     # lg.info('source : ' + src)

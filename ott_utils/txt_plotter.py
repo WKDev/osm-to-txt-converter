@@ -31,7 +31,7 @@ file_list = os.listdir(path)
 print(len(file_list))
 
 txts = [file for file in file_list if file.endswith(".txt")]
-for txt in glob.glob(path + '/*.txt'):
+for i, txt in enumerate(glob.glob(path + '/*.txt')):
     try:
         cx, cy = [], []
         print('opening : {}'.format(txt))
@@ -120,19 +120,12 @@ def current_yaw_callback(msg):
 
 
 def main():
-
     if ROS_INTEGRATION:
         rospy.Subscriber("odom", Odometry, callback)
         rospy.Subscriber("current_yaw", Float64, current_yaw_callback)
         rospy.Subscriber("target_yaw", Float64, target_yaw_callback)
         rospy.Subscriber("/LOCAL/kalmanFiltered", Pose2D, kalmanCallback)
         rospy.spin()
-
-    # if rospy.is_shutdown():
-    #     print('shutdown')
-    #     plotter()
-
-
 
 
 if __name__ == '__main__':

@@ -15,7 +15,7 @@ UTM_zone_x = 52
 UTM_zone_y = 'n'
 
 
-lg = WKLogger( target='point_increment' , log_path=None, log_level = 'info')
+lg = WKLogger( target='point_increment' , log_path=os.getcwd(), log_level = 'info')
 
 
 def point_increment(src_path = None, path_smooth = True, src_array = None, dst = None, save = True, diagnostic = True, node_interval = 0.1, filename='test'):
@@ -37,11 +37,13 @@ def point_increment(src_path = None, path_smooth = True, src_array = None, dst =
 
     Args:
         src_path: /home/abc.txt 식의 문자열을 넣어주면 거기에서 utm좌표를 불러와 점을 늘린 후, dst 경로에 반환합니다.
-        path_smooth:
-        src_array:
+        path_smooth: 경로를 부드럽게 할것인가를 결정합니다. ott_utils/ common.py에 _smooth함수가 정의되어 있으며,
+         여기에서 세부 파라미터 지정이 가능합니다.
+        src_array: 입력을 [[]] 형식의 numpy 배열로 받습니다. 입력이 경로가 되든, 배열이 되든, 둘중 하나만 해야 합니다.
         dst: /home/output 식의 문자열을 넣어주면 처리 후 저장합니다. 단, 이 때, save=True여야 합니다.
         save: True인 경우, 실제 파일로 저장합니다. 기본값이 True입니다.
         node_interval: 촘촘하게 만들 점 주기를 설정합니다.
+        diagnostic k, k-1, k-2 점을 확인해서 k,k-1과, k-1,k-2의 방향을 확인 후, 정상 범위 이내로 작동하는 경우 :
 
     Returns:
 
@@ -166,7 +168,7 @@ def point_increment(src_path = None, path_smooth = True, src_array = None, dst =
                 incremented = np.append(incremented, _points_to_add[:-1],axis=0)
 
             lg.debug('incremented :')
-            lg.verbose(incremented)
+            # lg.verbose(incremented)
 
         incremented = np.append(incremented, [p], axis=0)
 
