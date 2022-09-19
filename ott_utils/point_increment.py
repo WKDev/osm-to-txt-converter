@@ -103,9 +103,10 @@ def point_increment(src_path = None, path_smooth = True, src_array = None, dst =
             x_dist = abs(_x2 - _x1)
             y_dist = abs(_y2 - _y1)
 
-            # 기울기
+            # 기울기 계산,
             _slope = lambda b2, b1, a2, a1 : (b2 - b1)/(a2 - a1)
-            slope = _slope(_y2,_y1,_x2,_x1)
+            slope = _slope(_y2,_y1,_x2,_x1) # 쓸데가 있을까봐 두 줄로 만들어놨는데 쓸데가 없네요
+
             lg.debug('slope : {}'.format(slope))
             # 두 점으로 만들어낸 일차함수
             _eq_y = lambda x: slope * (x - _x2) + _y2
@@ -116,13 +117,16 @@ def point_increment(src_path = None, path_smooth = True, src_array = None, dst =
 
             lg.debug('expected new points : {}'.format(_point_available))
 
+            #############경로 유효성 진단 로직 ##################
             if i > 2 and diagnostic:
                 # threshold = np.pi / 4  # 점이 아무리 꺾여도 pi/4 이상 꺾이면 문제가 있는겁니다.. point_increment 진행하면 더욱 더요.
+                # 물론 이 로직 자체가 josm의 오류를 교정하기 위해 개발된 것이니만큼, 이 작업은 point_increment 전에 수행됩니다.
                 threshold = 45
-                # k점과 k-1, k-1과 k-2간의 각도 구하기
+                # k점과 k-1, k-1과 k-2간의 각도 구하기, 처음엔 rad 비교를 진행했으나, 직관성이 조금 부족해 각도로 비교합니다.
                 prev_slope_deg = np.rad2deg(np.arctan2(_y1-_y0, _x1-_x0))
                 curr_slope_deg = np.rad2deg(np.arctan2(_y2-_y1, _x2-_x1))
 
+                # 현재 점이 이전 두 점과 비교해 정상 범위 내에 있다면, True를 반환합니다.
                 check_line_valid = True if prev_slope_deg-threshold < curr_slope_deg < threshold + prev_slope_deg else False
 
                 lg.debug('current deg : {}, prev: {}'.format(curr_slope_deg, prev_slope_deg))
@@ -134,7 +138,7 @@ def point_increment(src_path = None, path_smooth = True, src_array = None, dst =
                     if src_array is not None:
                         lg.err('invalid path moving detected at filename : {}, src array line:{}, check original file.'.format(filename,i))
 
-
+            ###############point_increment 로직 #########################
             if _point_available > 2:
                 for t in range(_point_available):
                     tmp_point = np.empty((0, 1), dtype=np.float64)
@@ -182,8 +186,9 @@ def point_increment(src_path = None, path_smooth = True, src_array = None, dst =
 
 
     if path_smooth:
+        # 2기 때부터 대대로 내려져오던 그걸 그대로 사용했습니다. 저장이 완료되고, path_smoothing을 진행합니다.
         cx = incremented
-        newpath = _smooth(cx)
+        newpath = _smooth(cx) # common.py에 정의되어 있습니다.
         with open(txt_path, 'w') as fw:
             for coord_x, coord_y in newpath:
                 # print(coord_x,coord_y)
