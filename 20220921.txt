@@ -1,0 +1,100 @@
+[220921-22:34:37][osm_to_txt.py][INFO] return path : /Users/chanhyeokson/osm-to-txt-converter/output
+[220921-22:34:37][osm_to_txt.py][INFO] File : /Users/chanhyeokson/osm-to-txt-converter/input/1.osm
+[220921-22:34:37][osm_to_txt.py][VERBOSE] n : [-2.00951600e+06  3.72386697e+01  1.26772803e+02]
+[220921-22:34:37][osm_to_txt.py][VERBOSE] (302440.4072514386, 4123673.5612635952, 52, 'n')
+[220921-22:34:37][osm_to_txt.py][VERBOSE] n : [-2.00951700e+06  3.72387727e+01  1.26772861e+02]
+[220921-22:34:37][osm_to_txt.py][VERBOSE] (302445.846958473, 4123684.864554742, 52, 'n')
+[220921-22:34:37][osm_to_txt.py][VERBOSE] n : [-2.00951800e+06  3.72390830e+01  1.26773064e+02]
+[220921-22:34:37][osm_to_txt.py][VERBOSE] (302464.70924939145, 4123718.877460455, 52, 'n')
+[220921-22:34:37][osm_to_txt.py][VERBOSE] n : [-2.00951900e+06  3.72397934e+01  1.26773530e+02]
+[220921-22:34:37][osm_to_txt.py][VERBOSE] (302507.8715896604, 4123796.7292032787, 52, 'n')
+[220921-22:34:37][osm_to_txt.py][VERBOSE] UTM converted array : [[-2009516.           302440.40725144  4123673.5612636 ]
+ [-2009517.           302445.84695847  4123684.86455474]
+ [-2009518.           302464.70924939  4123718.87746046]
+ [-2009519.           302507.87158966  4123796.72920328]]
+[220921-22:34:37][osm_to_txt.py][VERBOSE] [[ 302440.40725144 4123673.5612636 ]
+ [ 302445.84695847 4123684.86455474]
+ [ 302464.70924939 4123718.87746046]
+ [ 302507.87158966 4123796.72920328]]
+[220921-22:34:37][point_increment][DEBUG] dist : 302440.4072514386 4123673.5612635952 302445.846958473 4123684.864554742 12.544114291798927
+[220921-22:34:37][point_increment][DEBUG] slope : 2.0779227769430175
+[220921-22:34:37][point_increment][DEBUG] expected new points : 249
+[220921-22:34:37][point_increment][DEBUG] incremented :
+[220921-22:34:37][point_increment][DEBUG] dist : 302445.846958473 4123684.864554742 302464.70924939145 4123718.877460455 38.89297846329508
+[220921-22:34:37][point_increment][DEBUG] slope : 1.8032224113270974
+[220921-22:34:37][point_increment][DEBUG] expected new points : 776
+[220921-22:34:37][point_increment][DEBUG] incremented :
+[220921-22:34:37][point_increment][DEBUG] dist : 302464.70924939145 4123718.877460455 302507.8715896604 4123796.7292032787 89.0161866076422
+[220921-22:34:37][point_increment][DEBUG] slope : 1.8036960539787483
+[220921-22:34:37][point_increment][DEBUG] expected new points : 1779
+[220921-22:34:37][point_increment][DEBUG] current deg : 60.99526299519488, prev: 60.9888813497535
+[220921-22:34:37][point_increment][DEBUG] incremented :
+[220921-22:34:37][point_increment][DEBUG] file will be saved here:  /Users/chanhyeokson/osm-to-txt-converter/output/1.txt
+[220921-22:34:44][osm_to_txt.py][INFO] return path : /Users/chanhyeokson/osm-to-txt-converter/output
+[220921-22:34:44][osm_to_txt.py][INFO] File : /Users/chanhyeokson/osm-to-txt-converter/input/2.osm
+[220921-22:34:44][osm_to_txt.py][VERBOSE] n : [-1.89580600e+06  3.72397934e+01  1.26773530e+02]
+[220921-22:34:44][osm_to_txt.py][VERBOSE] (302507.8715896604, 4123796.7292032787, 52, 'n')
+[220921-22:34:44][osm_to_txt.py][VERBOSE] n : [-1.89580800e+06  3.72401360e+01  1.26773754e+02]
+[220921-22:34:44][osm_to_txt.py][VERBOSE] (302528.6412480781, 4123834.2778993445, 52, 'n')
+[220921-22:34:44][osm_to_txt.py][VERBOSE] UTM converted array : [[-1895806.           302507.87158966  4123796.72920328]
+ [-1895808.           302528.64124808  4123834.27789934]]
+[220921-22:34:44][osm_to_txt.py][VERBOSE] [[ 302507.87158966 4123796.72920328]
+ [ 302528.64124808 4123834.27789934]]
+[220921-22:34:44][point_increment][DEBUG] dist : 302507.8715896604 4123796.7292032787 302528.6412480781 4123834.2778993445 42.9101769633698
+[220921-22:34:44][point_increment][DEBUG] slope : 1.8078629561782034
+[220921-22:34:44][point_increment][DEBUG] expected new points : 857
+[220921-22:34:44][point_increment][DEBUG] incremented :
+[220921-22:34:44][point_increment][DEBUG] file will be saved here:  /Users/chanhyeokson/osm-to-txt-converter/output/2.txt
+[220921-22:34:44][osm_to_txt.py][INFO] return path : /Users/chanhyeokson/osm-to-txt-converter/output
+[220921-22:34:44][osm_to_txt.py][INFO] File : /Users/chanhyeokson/osm-to-txt-converter/input/3.osm
+[220921-22:34:44][osm_to_txt.py][VERBOSE] n : [-1.89580900e+06  3.72401361e+01  1.26773754e+02]
+[220921-22:34:44][osm_to_txt.py][VERBOSE] (302528.6441819662, 4123834.285268784, 52, 'n')
+[220921-22:34:44][osm_to_txt.py][VERBOSE] n : [-1.89581000e+06  3.72402844e+01  1.26773852e+02]
+[220921-22:34:44][osm_to_txt.py][VERBOSE] (302537.67850142403, 4123850.5339138354, 52, 'n')
+[220921-22:34:44][osm_to_txt.py][VERBOSE] UTM converted array : [[       0.           302528.64124808  4123834.27789934]
+ [-1895810.           302537.67850142  4123850.53391384]]
+[220921-22:34:44][osm_to_txt.py][VERBOSE] [[ 302528.64124808 4123834.27789934]
+ [ 302537.67850142 4123850.53391384]]
+[220921-22:34:44][point_increment][DEBUG] dist : 302528.6412480781 4123834.2778993445 302537.67850142403 4123850.5339138354 18.599192325724285
+[220921-22:34:44][point_increment][DEBUG] slope : 1.7987782204047589
+[220921-22:34:44][point_increment][DEBUG] expected new points : 370
+[220921-22:34:44][point_increment][DEBUG] incremented :
+[220921-22:34:44][point_increment][DEBUG] file will be saved here:  /Users/chanhyeokson/osm-to-txt-converter/output/3.txt
+[220921-22:34:44][osm_to_txt.py][INFO] return path : /Users/chanhyeokson/osm-to-txt-converter/output
+[220921-22:34:44][osm_to_txt.py][INFO] File : /Users/chanhyeokson/osm-to-txt-converter/input/4.osm
+[220921-22:34:44][osm_to_txt.py][VERBOSE] n : [-1.94991700e+06  3.72402844e+01  1.26773852e+02]
+[220921-22:34:44][osm_to_txt.py][VERBOSE] (302537.6788487959, 4123850.5343797253, 52, 'n')
+[220921-22:34:44][osm_to_txt.py][VERBOSE] n : [-1.94991800e+06  3.72405362e+01  1.26774019e+02]
+[220921-22:34:44][osm_to_txt.py][VERBOSE] (302553.1421999512, 4123878.127933968, 52, 'n')
+[220921-22:34:44][osm_to_txt.py][VERBOSE] UTM converted array : [[       0.           302537.67850142  4123850.53391384]
+ [-1949918.           302553.14219995  4123878.12793397]]
+[220921-22:34:44][osm_to_txt.py][VERBOSE] [[ 302537.67850142 4123850.53391384]
+ [ 302553.14219995 4123878.12793397]]
+[220921-22:34:44][point_increment][DEBUG] dist : 302537.67850142403 4123850.5339138354 302553.1421999512 4123878.127933968 31.631565234896197
+[220921-22:34:44][point_increment][DEBUG] slope : 1.7844385729530172
+[220921-22:34:44][point_increment][DEBUG] expected new points : 631
+[220921-22:34:44][point_increment][DEBUG] incremented :
+[220921-22:34:44][point_increment][DEBUG] file will be saved here:  /Users/chanhyeokson/osm-to-txt-converter/output/4.txt
+[220921-22:34:44][osm_to_txt.py][INFO] return path : /Users/chanhyeokson/osm-to-txt-converter/output
+[220921-22:34:44][osm_to_txt.py][INFO] File : /Users/chanhyeokson/osm-to-txt-converter/input/5.osm
+[220921-22:34:44][osm_to_txt.py][VERBOSE] n : [-1.96614900e+06  3.72405362e+01  1.26774019e+02]
+[220921-22:34:44][osm_to_txt.py][VERBOSE] (302553.1424781766, 4123878.128592444, 52, 'n')
+[220921-22:34:44][osm_to_txt.py][VERBOSE] n : [-1.96615000e+06  3.72408098e+01  1.26774198e+02]
+[220921-22:34:44][osm_to_txt.py][VERBOSE] (302569.8098946081, 4123908.1112787477, 52, 'n')
+[220921-22:34:44][osm_to_txt.py][VERBOSE] n : [-2.00950900e+06  3.72409337e+01  1.26774270e+02]
+[220921-22:34:44][osm_to_txt.py][VERBOSE] (302576.5151171022, 4123921.71260588, 52, 'n')
+[220921-22:34:44][osm_to_txt.py][VERBOSE] UTM converted array : [[       0.           302553.14219995  4123878.12793397]
+ [-1966150.           302569.80989461  4123908.11127875]
+ [-2009509.           302576.5151171   4123921.71260588]]
+[220921-22:34:44][osm_to_txt.py][VERBOSE] [[ 302553.14219995 4123878.12793397]
+ [ 302569.80989461 4123908.11127875]
+ [ 302576.5151171  4123921.71260588]]
+[220921-22:34:44][point_increment][DEBUG] dist : 302553.1421999512 4123878.127933968 302569.8098946081 4123908.1112787477 34.304708268110545
+[220921-22:34:44][point_increment][DEBUG] slope : 1.79888973232689
+[220921-22:34:44][point_increment][DEBUG] expected new points : 685
+[220921-22:34:44][point_increment][DEBUG] incremented :
+[220921-22:34:44][point_increment][DEBUG] dist : 302569.8098946081 4123908.1112787477 302576.5151171022 4123921.71260588 15.164303757794606
+[220921-22:34:44][point_increment][DEBUG] slope : 2.028467682382112
+[220921-22:34:44][point_increment][DEBUG] expected new points : 302
+[220921-22:34:44][point_increment][DEBUG] incremented :
+[220921-22:34:44][point_increment][DEBUG] file will be saved here:  /Users/chanhyeokson/osm-to-txt-converter/output/5.txt

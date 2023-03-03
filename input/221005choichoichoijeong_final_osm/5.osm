@@ -1,0 +1,11 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<osm version='0.6' generator='JOSM'>
+  <node id='-1966149' action='modify' visible='true' lat='37.2405361969' lon='126.77401854453' />
+  <node id='-1966150' action='modify' visible='true' lat='37.24080978955' lon='126.77419837556' />
+  <node id='-2009509' action='modify' visible='true' lat='37.24093372057' lon='126.77427031316' />
+  <way id='-162760' action='modify' visible='true'>
+    <nd ref='-1966149' />
+    <nd ref='-1966150' />
+    <nd ref='-2009509' />
+  </way>
+</osm>
